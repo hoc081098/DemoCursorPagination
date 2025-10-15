@@ -48,41 +48,42 @@ app.MapGet("/offset", async (
   ApplicationDbContext dbContext,
   int page = 1,
   int pageSize = 30,
-  CancellationToken cancellationToken = default) =>
-  {
-      Console.WriteLine($"Offset pagination: page={page}, pageSize={pageSize}");
+  CancellationToken cancellationToken = default
+  ) =>
+{
+    Console.WriteLine($"Offset pagination: page={page}, pageSize={pageSize}");
 
-      if (page < 1) return Results.BadRequest("Page must be greater than 0");
-      if (pageSize < 1) return Results.BadRequest("Page size must be greater than 0");
-      if (pageSize > 100) return Results.BadRequest("Page size must be less than or equal to 100");
+    if (page < 1) return Results.BadRequest("Page must be greater than 0");
+    if (pageSize < 1) return Results.BadRequest("Page size must be greater than 0");
+    if (pageSize > 100) return Results.BadRequest("Page size must be less than or equal to 100");
 
-      var query = dbContext.UserNotes
-        .AsNoTracking()
-        .OrderByDescending(x => x.NoteDate)
-        .ThenByDescending(x => x.Id);
+    var query = dbContext.UserNotes
+      .AsNoTracking()
+      .OrderByDescending(x => x.NoteDate)
+      .ThenByDescending(x => x.Id);
 
-      // Offset pagination typically counts the total number of items
-      var totalCount = await query.CountAsync(cancellationToken);
-      var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+    // Offset pagination typically counts the total number of items
+    var totalCount = await query.CountAsync(cancellationToken);
+    var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
-      // Skip and take the required number of items
-      var items = await query
-        .Skip((page - 1) * pageSize)
-        .Take(pageSize)
-        .ToListAsync(cancellationToken);
+    // Skip and take the required number of items
+    var items = await query
+      .Skip((page - 1) * pageSize)
+      .Take(pageSize)
+      .ToListAsync(cancellationToken);
 
-      return Results.Ok(new
-      {
-          Items = items,
-          // Metadata
-          Page = page,
-          PageSize = pageSize,
-          TotalCount = totalCount,
-          TotalPages = totalPages,
-          HasPreviousPage = page > 1,
-          HasNextPage = page < totalPages
-      });
-  });
+    return Results.Ok(new
+    {
+        Items = items,
+        // Metadata
+        Page = page,
+        PageSize = pageSize,
+        TotalCount = totalCount,
+        TotalPages = totalPages,
+        HasPreviousPage = page > 1,
+        HasNextPage = page < totalPages
+    });
+});
 
 
 app.MapGet("/cursor", async (
