@@ -87,26 +87,26 @@ app.MapGet("/offset", async (
 
 app.MapGet("/cursor", async (
   ApplicationDbContext dbContext,
-  DateOnly? date = null,
-  Guid? lastId = null,
+  string? cursor = null,
   int limit = 30,
   CancellationToken cancellationToken = default
 ) =>
 {
-  Console.WriteLine($"Cursor pagination: date={date}, lastId={lastId}, limit={limit}");
-
   if (limit < 1) return Results.BadRequest("Limit must be greater than 0");
   if (limit > 100) return Results.BadRequest("Limit must be less than or equal to 100");
 
+  var decodedCursor = DemoCursorPagination.Cursor.Decode(cursor);
+  Console.WriteLine($"Cursor pagination: cursor={decodedCursor}, limit={limit}");
+
   var query = dbContext.UserNotes.AsNoTracking();
-  if (lastId is not null && date is not null)
+  if (decodedCursor is not null)
   {
     // Use the cursor to fetch the next set of items
     // If we sorting in ASC order, we'd use '>' instead of '<'.
     query = query.Where(
       x => EF.Functions.LessThanOrEqual(
         ValueTuple.Create(x.NoteDate, x.Id),
-        ValueTuple.Create(date, lastId)
+        ValueTuple.Create(decodedCursor.Date, Guid.Parse(decodedCursor.LastId))
       )
     );
   }
@@ -120,8 +120,13 @@ app.MapGet("/cursor", async (
 
   // Extract the cursor and ID for the next page
   var hasMore = items.Count > limit;
-  DateOnly? nextDate = hasMore ? items[^1].NoteDate : null;
-  Guid? nextLastId = hasMore ? items[^1].Id : null;
+  string? nextCursor = hasMore
+      ? DemoCursorPagination.Cursor.Encode(
+        new DemoCursorPagination.Cursor(
+          items[^1].NoteDate,
+          items[^1].Id.ToString())
+        ) 
+      : null;
   if (hasMore)
   {
     items.RemoveAt(items.Count - 1); // Remove the extra item
@@ -133,8 +138,7 @@ app.MapGet("/cursor", async (
     // Metadata
     Limit = limit,
     HasMore = hasMore,
-    NextDate = nextDate,
-    NextLastId = nextLastId,
+    NextCursor = nextCursor
   });
 });
 
