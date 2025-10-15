@@ -4,3 +4,16 @@ GET {{BASE_URL}}/offset?page=1&pageSize=4
 User-Agent: rest-client
 Content-Type: application/json
 Accept: application/json
+
+###
+
+GET {{BASE_URL}}/cursor?limit=4
+User-Agent: rest-client
+Content-Type: application/json
+Accept: application/json
+
+###
+
+@DATE=2025-10-16
+@LAST_ID=a2628e7e-c34a-4c52-a208-2434dade9743
+GET {{BASE_URL}}/cursor?limit=4&date={{DATE}}&lastId={{LAST_ID}}

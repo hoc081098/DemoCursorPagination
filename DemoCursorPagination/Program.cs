@@ -50,6 +50,8 @@ app.MapGet("/offset", async (
   int pageSize = 30,
   CancellationToken cancellationToken = default) =>
   {
+    Console.WriteLine($"Offset pagination: page={page}, pageSize={pageSize}");
+
     if (page < 1) return Results.BadRequest("Page must be greater than 0");
     if (pageSize < 1) return Results.BadRequest("Page size must be greater than 0");
     if (pageSize > 100) return Results.BadRequest("Page size must be less than or equal to 100");
@@ -80,6 +82,59 @@ app.MapGet("/offset", async (
       HasNextPage = page < totalPages
     });
   });
+
+
+app.MapGet("/cursor", async (
+  ApplicationDbContext dbContext,
+  DateOnly? date = null,
+  Guid? lastId = null,
+  int limit = 30,
+  CancellationToken cancellationToken = default
+) =>
+{
+  Console.WriteLine($"Cursor pagination: date={date}, lastId={lastId}, limit={limit}");
+
+  if (limit < 1) return Results.BadRequest("Limit must be greater than 0");
+  if (limit > 100) return Results.BadRequest("Limit must be less than or equal to 100");
+
+  var query = dbContext.UserNotes.AsQueryable();
+  if (lastId is not null && date is not null)
+  {
+    // Use the cursor to fetch the next set of items
+    // If we sorting in ASC order, we'd use '>' instead of '<'.
+    query = query.Where(
+      x => x.NoteDate < date ||
+        (x.NoteDate == date && x.Id < lastId)
+    );
+  }
+
+  // Fetch the items and determine if there are more
+  var items = await query
+    .OrderByDescending(x => x.NoteDate)
+    .ThenByDescending(x => x.Id)
+    .Take(limit + 1) // Take one extra item to check if there are more
+    .ToListAsync(cancellationToken);
+
+  // Extract the cursor and ID for the next page
+  var hasMore = items.Count > limit;
+  if (hasMore)
+  {
+    items.RemoveAt(items.Count - 1); // Remove the extra item
+  }
+  DateOnly? nextDate = hasMore ? items[^1].NoteDate : null;
+  Guid? nextLastId = hasMore ? items[^1].Id : null;
+
+
+  return Results.Ok(new
+  {
+    Items = items,
+    // Metadata
+    Limit = limit,
+    HasMore = hasMore,
+    NextDate = nextDate,
+    NextLastId = nextLastId,
+  });
+});
 
 app.Run();
 
