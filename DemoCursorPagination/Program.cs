@@ -104,8 +104,10 @@ app.MapGet("/cursor", async (
     // Use the cursor to fetch the next set of items
     // If we sorting in ASC order, we'd use '>' instead of '<'.
     query = query.Where(
-      x => x.NoteDate < date ||
-        (x.NoteDate == date && x.Id <= lastId)
+      x => EF.Functions.LessThanOrEqual(
+        ValueTuple.Create(x.NoteDate, x.Id),
+        ValueTuple.Create(date, lastId)
+      )
     );
   }
 
