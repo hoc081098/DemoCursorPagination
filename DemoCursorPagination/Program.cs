@@ -105,7 +105,7 @@ app.MapGet("/cursor", async (
     // If we sorting in ASC order, we'd use '>' instead of '<'.
     query = query.Where(
       x => x.NoteDate < date ||
-        (x.NoteDate == date && x.Id < lastId)
+        (x.NoteDate == date && x.Id <= lastId)
     );
   }
 
@@ -118,13 +118,12 @@ app.MapGet("/cursor", async (
 
   // Extract the cursor and ID for the next page
   var hasMore = items.Count > limit;
+  DateOnly? nextDate = hasMore ? items[^1].NoteDate : null;
+  Guid? nextLastId = hasMore ? items[^1].Id : null;
   if (hasMore)
   {
     items.RemoveAt(items.Count - 1); // Remove the extra item
   }
-  DateOnly? nextDate = hasMore ? items[^1].NoteDate : null;
-  Guid? nextLastId = hasMore ? items[^1].Id : null;
-
 
   return Results.Ok(new
   {
