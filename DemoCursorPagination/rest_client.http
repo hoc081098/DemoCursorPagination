@@ -14,6 +14,6 @@ Accept: application/json
 
 ###
 
-@DATE=2025-10-16
-@LAST_ID=a2628e7e-c34a-4c52-a208-2434dade9743
+@DATE=2025-10-15
+@LAST_ID=d8c784e8-4f1b-482a-8dd1-f320474af11e
 GET {{BASE_URL}}/cursor?limit=4&date={{DATE}}&lastId={{LAST_ID}}
