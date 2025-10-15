@@ -1,4 +1,7 @@
+using System.Text.Json;
 using DemoCursorPagination.Data;
+
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +14,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
   options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
 });
 
+builder.Services.Configure<JsonOptions>(options =>
+{
+  // .NET 8 comes with new naming policies for snake_case and kebab-case.
+  // Read more at https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-8#naming-policies
+  options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument(config =>
@@ -61,14 +70,14 @@ app.MapGet("/offset", async (
 
     return Results.Ok(new
     {
-      items = items,
+      Items = items,
       // Metadata
-      page = page,
-      pageSize = pageSize,
-      totalCount = totalCount,
-      totalPages = totalPages,
-      hasPreviousPage = page > 1,
-      hasNextPage = page < totalPages
+      Page = page,
+      PageSize = pageSize,
+      TotalCount = totalCount,
+      TotalPages = totalPages,
+      HasPreviousPage = page > 1,
+      HasNextPage = page < totalPages
     });
   });
 
