@@ -23,31 +23,54 @@ builder.Services.AddOpenApiDocument(config =>
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
-    app.UseOpenApi();
-    app.UseSwaggerUi(config =>
-    {
-        config.DocumentTitle = "DemoCursorPaginationAPI";
-        config.Path = "/swagger";
-        config.DocumentPath = "/swagger/{documentName}/swagger.json";
-        config.DocExpansion = "list";
-    });
+  app.UseOpenApi();
+  app.UseSwaggerUi(config =>
+  {
+    config.DocumentTitle = "DemoCursorPaginationAPI";
+    config.Path = "/swagger";
+    config.DocumentPath = "/swagger/{documentName}/swagger.json";
+    config.DocExpansion = "list";
+  });
 }
 
 app.MapGet("/", () => "Hello World!");
-app.MapGet("/noteitems", async (ApplicationDbContext db) =>
-{
-  var items = await db.UserNotes
-    .AsNoTracking()
-    .Select(x => new {
-        x.Id,
-        x.Note,
-        x.NoteDate,
-        x.UserId,
-        UserName = x.User.Name
-    })
-    .ToListAsync();
-  return items;
-});
+
+app.MapGet("/offset", async (
+  ApplicationDbContext dbContext,
+  int page = 1,
+  int pageSize = 30,
+  CancellationToken cancellationToken = default) =>
+  {
+    if (page < 1) return Results.BadRequest("Page must be greater than 0");
+    if (pageSize < 1) return Results.BadRequest("Page size must be greater than 0");
+    if (pageSize > 100) return Results.BadRequest("Page size must be less than or equal to 100");
+
+    var query = dbContext.UserNotes
+      .OrderByDescending(x => x.NoteDate)
+      .ThenByDescending(x => x.Id);
+
+    // Offset pagination typically counts the total number of items
+    var totalCount = await query.CountAsync(cancellationToken);
+    var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+    // Skip and take the required number of items
+    var items = await query
+      .Skip((page - 1) * pageSize)
+      .Take(pageSize)
+      .ToListAsync(cancellationToken);
+
+    return Results.Ok(new
+    {
+      items = items,
+      // Metadata
+      page = page,
+      pageSize = pageSize,
+      totalCount = totalCount,
+      totalPages = totalPages,
+      hasPreviousPage = page > 1,
+      hasNextPage = page < totalPages
+    });
+  });
 
 app.Run();
 
