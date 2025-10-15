@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DemoCursorPagination.Models;
 
-public partial class UserNote
+public partial class UserNotes
 {
     public Guid Id { get; set; }
 
@@ -13,5 +13,5 @@ public partial class UserNote
 
     public DateOnly NoteDate { get; set; }
 
-    public virtual User User { get; set; } = null!;
+    public virtual Users User { get; set; } = null!;
 }
