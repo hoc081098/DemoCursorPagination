@@ -57,6 +57,7 @@ app.MapGet("/offset", async (
     if (pageSize > 100) return Results.BadRequest("Page size must be less than or equal to 100");
 
     var query = dbContext.UserNotes
+      .AsNoTracking()
       .OrderByDescending(x => x.NoteDate)
       .ThenByDescending(x => x.Id);
 
@@ -97,7 +98,7 @@ app.MapGet("/cursor", async (
   if (limit < 1) return Results.BadRequest("Limit must be greater than 0");
   if (limit > 100) return Results.BadRequest("Limit must be less than or equal to 100");
 
-  var query = dbContext.UserNotes.AsQueryable();
+  var query = dbContext.UserNotes.AsNoTracking();
   if (lastId is not null && date is not null)
   {
     // Use the cursor to fetch the next set of items
@@ -137,4 +138,3 @@ app.MapGet("/cursor", async (
 });
 
 app.Run();
-
