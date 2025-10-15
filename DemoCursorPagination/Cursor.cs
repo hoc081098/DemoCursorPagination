@@ -6,27 +6,27 @@ namespace DemoCursorPagination;
 
 public sealed record Cursor(DateOnly Date, string LastId)
 {
-  public static string Encode(Cursor cursor)
-  {
-    var jsonString = JsonSerializer.Serialize(cursor);
-    return Base64UrlTextEncoder.Encode(Encoding.UTF8.GetBytes(jsonString));
-  }
-
-  public static Cursor? Decode(string? encodedCursor)
-  {
-    if (string.IsNullOrEmpty(encodedCursor))
+    public static string Encode(Cursor cursor)
     {
-      return null;
+        var jsonString = JsonSerializer.Serialize(cursor);
+        return Base64UrlTextEncoder.Encode(Encoding.UTF8.GetBytes(jsonString));
     }
 
-    try
+    public static Cursor? Decode(string? encodedCursor)
     {
-      var jsonString = Encoding.UTF8.GetString(Base64UrlTextEncoder.Decode(encodedCursor));
-      return JsonSerializer.Deserialize<Cursor>(jsonString);
+        if (string.IsNullOrEmpty(encodedCursor))
+        {
+            return null;
+        }
+
+        try
+        {
+            var jsonString = Encoding.UTF8.GetString(Base64UrlTextEncoder.Decode(encodedCursor));
+            return JsonSerializer.Deserialize<Cursor>(jsonString);
+        }
+        catch
+        {
+            return null;
+        }
     }
-    catch
-    {
-      return null;
-    }
-  }
 }
