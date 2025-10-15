@@ -26,7 +26,9 @@ public partial class ApplicationDbContext : DbContext
 
             entity.ToTable("user_notes", "notes");
 
-            entity.HasIndex(e => e.UserId, "idx_user_notes__user_id");
+            entity.HasIndex(e => new { e.NoteDate, e.Id }, "idx_user_notes_note_date_id").IsDescending();
+
+            entity.HasIndex(e => e.UserId, "idx_user_notes_user_id");
 
             entity.Property(e => e.Id)
                 .HasDefaultValueSql("gen_random_uuid()")
