@@ -106,3 +106,5 @@ ScaffoldingReadMe.txt
 # Backup files
 *.bak
 *~
+
+.fake
