@@ -99,6 +99,12 @@ app.MapGet("/cursor", async (
     var decodedCursor = DemoCursorPagination.Cursor.Decode(cursor);
     Console.WriteLine($"Cursor pagination: cursor={decodedCursor}, limit={limit}");
 
+    // Validate cursor version
+    if (decodedCursor is not null && decodedCursor.Version != 1)
+    {
+        return Results.BadRequest($"Unsupported cursor version: {decodedCursor.Version}. Expected version 1.");
+    }
+
     var query = dbContext.UserNotes.AsNoTracking();
     if (decodedCursor is not null)
     {
@@ -125,7 +131,8 @@ app.MapGet("/cursor", async (
         ? DemoCursorPagination.Cursor.Encode(
           new DemoCursorPagination.Cursor(
             items[^1].NoteDate,
-            items[^1].Id.ToString())
+            items[^1].Id.ToString(),
+            Version: 1)
           )
         : null;
     if (hasMore)
