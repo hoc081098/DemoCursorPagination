@@ -1,6 +1,6 @@
 # DemoCursorPagination
 
-A .NET 9 ASP.NET Core minimal API demonstrating two pagination strategies: **Offset-based** and **Cursor-based** pagination using PostgreSQL and Entity Framework Core.
+A .NET 10 ASP.NET Core minimal API demonstrating two pagination strategies: **Offset-based** and **Cursor-based** pagination using PostgreSQL and Entity Framework Core.
 
 ## 🚀 Features
 
@@ -13,7 +13,7 @@ A .NET 9 ASP.NET Core minimal API demonstrating two pagination strategies: **Off
 
 ## 📋 Prerequisites
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [Docker](https://www.docker.com/get-started) (for PostgreSQL)
 - [PostgreSQL 16](https://www.postgresql.org/) (or use Docker)
 
@@ -158,9 +158,9 @@ GET /cursor?limit=10&cursor=eyJEYXRlIjoiMjAyNS0xMC0xNSIsIkxhc3RJZCI6ImZmYzlmOTMz
 
 ## 🛠️ Technology Stack
 
-- **Framework**: .NET 9 / ASP.NET Core Minimal APIs
+- **Framework**: .NET 10 / ASP.NET Core Minimal APIs
 - **Database**: PostgreSQL 16
-- **ORM**: Entity Framework Core 9
+- **ORM**: Entity Framework Core 10
 - **Database Provider**: Npgsql.EntityFrameworkCore.PostgreSQL
 - **API Documentation**: NSwag (Swagger/OpenAPI)
 - **JSON Serialization**: System.Text.Json with snake_case naming

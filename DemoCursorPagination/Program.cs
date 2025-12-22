@@ -16,7 +16,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.Configure<JsonOptions>(options =>
 {
-    // .NET 8 comes with new naming policies for snake_case and kebab-case.
+    // .NET 8+ comes with new naming policies for snake_case and kebab-case.
     // Read more at https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-8#naming-policies
     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
 });
