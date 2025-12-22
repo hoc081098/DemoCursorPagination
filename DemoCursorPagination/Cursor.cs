@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DemoCursorPagination;
 
-public sealed record Cursor(DateOnly Date, string LastId)
+public sealed record Cursor(DateOnly Date, string LastId, int Version = 1)
 {
     public static string Encode(Cursor cursor)
     {
