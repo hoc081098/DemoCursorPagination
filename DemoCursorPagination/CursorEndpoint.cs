@@ -1,5 +1,6 @@
 using DemoCursorPagination.Contracts;
 using DemoCursorPagination.Data;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace DemoCursorPagination;
@@ -9,16 +10,19 @@ public sealed class CursorEndpoint(
     ILogger<CursorEndpoint> logger
 )
 {
+    [UsedImplicitly]
     public sealed record Request(
         string? Cursor = null,
         int Limit = 30);
 
+    [UsedImplicitly]
     public sealed record Metadata(
         int Limit,
         bool HasMore,
         string? NextCursor
     );
 
+    [UsedImplicitly]
     public sealed record Response(
         IReadOnlyList<NoteResponse> Items,
         Metadata Metadata);
