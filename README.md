@@ -3,7 +3,7 @@
 [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Build](https://github.com/yourusername/DemoCursorPagination/workflows/.NET%20Build%20and%20Test/badge.svg)](https://github.com/yourusername/DemoCursorPagination/actions)
+[![Build](https://github.com/hoc081098/DemoCursorPagination/actions/workflows/build.yml/badge.svg)](https://github.com/hoc081098/DemoCursorPagination/actions/workflows/build.yml)
 
 A .NET 10 ASP.NET Core minimal API demonstrating two pagination strategies: **Offset-based** and **Cursor-based** pagination using PostgreSQL and Entity Framework Core.
 
