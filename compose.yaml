@@ -1,0 +1,24 @@
+﻿services:
+  demo-cursor-pagination-db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=DemoCursorPagination
+    ports:
+      - "5434:5432"
+    volumes:
+      - demo_cursor_pagination_db_data:/var/lib/postgresql
+      # To execute the SQL files when the container starts, we can mount them as volumes and use the PostgreSQL initialization feature.
+      # The /docker-entrypoint-initdb.d/ directory is automatically executed by PostgreSQL when the container is first initialized.
+      # Files are executed in alphabetical order, so the 01-schema.sql will run before 02-seed.sql.
+      #
+      # Note: These scripts only run when the database is first created.
+      # To re-run them, you need to remove the volume: `docker compose down -v` then `docker compose up`.
+      - ./DemoCursorPagination/postgres.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./DemoCursorPagination/postgres_with_seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+
+
+volumes:
+  demo_cursor_pagination_db_data:

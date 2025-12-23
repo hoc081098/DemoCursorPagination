@@ -19,33 +19,10 @@ A .NET 10 ASP.NET Core minimal API demonstrating two pagination strategies: **Of
 
 ## 🗄️ Database Setup
 
-### 1. Start PostgreSQL with Docker
+Start PostgreSQL with Docker
 
 ```bash
-docker run --name devhub-postgres \
-  -e POSTGRES_PASSWORD=mysecretpassword \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_DB=devhub \
-  -p 5432:5432 \
-  -v devhub_pgdata:/var/lib/postgresql/data \
-  -d postgres:16
-```
-
-### 2. Initialize Database Schema
-
-Execute the SQL script to create the database schema:
-
-```bash
-# Connect to PostgreSQL and run the schema script
-docker exec -i devhub-postgres psql -U postgres -d devhub < DemoCursorPagination/postgres.sql
-```
-
-### 3. (Optional) Seed Sample Data
-
-To populate the database with sample data (1,000 users and 1,000,000 notes):
-
-```bash
-docker exec -i devhub-postgres psql -U postgres -d devhub < DemoCursorPagination/postgres_with_seed.sql
+docker compose up -d
 ```
 
 ## 🏃 Running the Application
