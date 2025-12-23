@@ -118,7 +118,7 @@ app.MapGet("/cursor", async (
     if (decodedCursor is not null)
     {
         // Use the cursor to fetch the next set of items
-        // If we sorting in ASC order, we'd use '>' instead of '<'.
+        // If we're sorting in ASC order, we'd use '>' instead of '<'.
         query = query.Where(x => EF.Functions.LessThanOrEqual(
                 ValueTuple.Create(x.NoteDate, x.Id),
                 ValueTuple.Create(decodedCursor.Date, Guid.Parse(decodedCursor.LastId))
@@ -135,7 +135,7 @@ app.MapGet("/cursor", async (
 
     // Extract the cursor and ID for the next page
     var hasMore = items.Count > limit;
-    string? nextCursor = hasMore
+    var nextCursor = hasMore
         ? DemoCursorPagination.Cursor.Encode(
             new DemoCursorPagination.Cursor(
                 items[^1].NoteDate,
