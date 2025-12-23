@@ -4,7 +4,7 @@
 
 -- 1) 1,000 Users
 INSERT INTO identity.users (id, name)
-SELECT gen_random_uuid(), 'user_' || gs
+SELECT uuidv7(), 'user_' || gs
 FROM generate_series(1, 1000) AS gs;
 
 -- 2) 1,000,000 Notes (randomized)
@@ -26,7 +26,7 @@ BEGIN
 
   INSERT INTO notes.user_notes (id, user_id, note, note_date)
   SELECT
-    gen_random_uuid(),
+    uuidv7(),
     (SELECT id FROM tmp_users_rn WHERE rn = 1 + floor(random() * v_max_rn)::int),
     left(md5(gs::text || ':' || clock_timestamp()::text), 80),
     (DATE '2020-01-01' + ((random() * (CURRENT_DATE - DATE '2020-01-01'))::int))::date
