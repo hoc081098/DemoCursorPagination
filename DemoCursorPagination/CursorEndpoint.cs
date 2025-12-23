@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DemoCursorPagination;
 
-public class CursorEndpoint(
+public sealed class CursorEndpoint(
     ApplicationDbContext dbContext,
     ILogger<CursorEndpoint> logger
 )
@@ -12,6 +12,16 @@ public class CursorEndpoint(
     public sealed record Request(
         string? Cursor = null,
         int Limit = 30);
+
+    public sealed record Metadata(
+        int Limit,
+        bool HasMore,
+        string? NextCursor
+    );
+
+    public sealed record Response(
+        IReadOnlyList<NoteResponse> Items,
+        Metadata Metadata);
 
     public async Task<IResult> Handle(Request request,
         CancellationToken cancellationToken = default)
@@ -68,15 +78,14 @@ public class CursorEndpoint(
             items.RemoveAt(items.Count - 1); // Remove the extra item
         }
 
-        return Results.Ok(new
-        {
-            Items = items,
-            Metadata = new
-            {
-                Limit = limit,
-                HasMore = hasMore,
-                NextCursor = nextCursor
-            }
-        });
+        var response = new Response(
+            Items: items.Select(x => x.ToResponse()).ToArray(),
+            Metadata: new Metadata(
+                Limit: limit,
+                HasMore: hasMore,
+                NextCursor: nextCursor
+            )
+        );
+        return Results.Ok(response);
     }
 }
