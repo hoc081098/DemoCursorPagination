@@ -1,6 +1,7 @@
 using DemoCursorPagination.Contracts;
 using DemoCursorPagination.Data;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace DemoCursorPagination;
@@ -27,16 +28,16 @@ public sealed class CursorEndpoint(
         IReadOnlyList<NoteResponse> Items,
         Metadata Metadata);
 
-    public async Task<IResult> Handle(Request request,
+    public async Task<Results<Ok<Response>, BadRequest<string>>> Handle(Request request,
         CancellationToken cancellationToken = default)
     {
         var limit = request.Limit;
         switch (limit)
         {
             case < 1:
-                return Results.BadRequest("Limit must be greater than 0");
+                return TypedResults.BadRequest("Limit must be greater than 0");
             case > 100:
-                return Results.BadRequest("Limit must be less than or equal to 100");
+                return TypedResults.BadRequest("Limit must be less than or equal to 100");
         }
 
         var decodedCursor = Cursor.Decode(request.Cursor);
@@ -45,7 +46,7 @@ public sealed class CursorEndpoint(
         // Validate cursor version
         if (decodedCursor is not null && decodedCursor.Version != 1)
         {
-            return Results.BadRequest($"Unsupported cursor version: {decodedCursor.Version}. Expected version 1.");
+            return TypedResults.BadRequest($"Unsupported cursor version: {decodedCursor.Version}. Expected version 1.");
         }
 
         var query = dbContext.UserNotes.AsNoTracking();
@@ -90,6 +91,6 @@ public sealed class CursorEndpoint(
                 NextCursor: nextCursor
             )
         );
-        return Results.Ok(response);
+        return TypedResults.Ok(response);
     }
 }

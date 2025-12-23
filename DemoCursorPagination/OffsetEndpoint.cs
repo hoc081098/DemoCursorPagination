@@ -1,6 +1,7 @@
 using DemoCursorPagination.Contracts;
 using DemoCursorPagination.Data;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace DemoCursorPagination;
@@ -30,7 +31,7 @@ public sealed class OffsetEndpoint(
         IReadOnlyList<NoteResponse> Items,
         Metadata Metadata);
 
-    public async Task<IResult> Handle(Request request,
+    public async Task<Results<Ok<Response>, BadRequest<string>>> Handle(Request request,
         CancellationToken cancellationToken = default)
     {
         var page = request.Page;
@@ -40,15 +41,15 @@ public sealed class OffsetEndpoint(
 
         if (page < 1)
         {
-            return Results.BadRequest("Page must be greater than 0");
+            return TypedResults.BadRequest("Page must be greater than 0");
         }
 
         switch (pageSize)
         {
             case < 1:
-                return Results.BadRequest("Page size must be greater than 0");
+                return TypedResults.BadRequest("Page size must be greater than 0");
             case > 100:
-                return Results.BadRequest("Page size must be less than or equal to 100");
+                return TypedResults.BadRequest("Page size must be less than or equal to 100");
         }
 
         var query = dbContext.UserNotes
@@ -77,6 +78,6 @@ public sealed class OffsetEndpoint(
                 HasNextPage: page < totalPages
             )
         );
-        return Results.Ok(response);
+        return TypedResults.Ok(response);
     }
 }
