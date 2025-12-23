@@ -53,8 +53,13 @@ app.MapGet("/offset", async (
     Console.WriteLine($"Offset pagination: page={page}, pageSize={pageSize}");
 
     if (page < 1) return Results.BadRequest("Page must be greater than 0");
-    if (pageSize < 1) return Results.BadRequest("Page size must be greater than 0");
-    if (pageSize > 100) return Results.BadRequest("Page size must be less than or equal to 100");
+    switch (pageSize)
+    {
+        case < 1:
+            return Results.BadRequest("Page size must be greater than 0");
+        case > 100:
+            return Results.BadRequest("Page size must be less than or equal to 100");
+    }
 
     var query = dbContext.UserNotes
         .AsNoTracking()
@@ -92,8 +97,13 @@ app.MapGet("/cursor", async (
     CancellationToken cancellationToken = default
 ) =>
 {
-    if (limit < 1) return Results.BadRequest("Limit must be greater than 0");
-    if (limit > 100) return Results.BadRequest("Limit must be less than or equal to 100");
+    switch (limit)
+    {
+        case < 1:
+            return Results.BadRequest("Limit must be greater than 0");
+        case > 100:
+            return Results.BadRequest("Limit must be less than or equal to 100");
+    }
 
     var decodedCursor = DemoCursorPagination.Cursor.Decode(cursor);
     Console.WriteLine($"Cursor pagination: cursor={decodedCursor}, limit={limit}");
