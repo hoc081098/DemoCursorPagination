@@ -1,12 +1,10 @@
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
 CREATE SCHEMA IF NOT EXISTS identity;
 CREATE SCHEMA IF NOT EXISTS notes;
 
 DROP TABLE IF EXISTS "identity"."users";
 -- Table Definition
 CREATE TABLE "identity"."users" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "id" uuid NOT NULL DEFAULT uuidv7(),
     "name" varchar(20) NOT NULL,
     PRIMARY KEY ("id")
 );
@@ -14,7 +12,7 @@ CREATE TABLE "identity"."users" (
 DROP TABLE IF EXISTS "notes"."user_notes";
 -- Table Definition
 CREATE TABLE "notes"."user_notes" (
-    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "id" uuid NOT NULL DEFAULT uuidv7(),
     "user_id" uuid NOT NULL,
     "note" varchar(500) NOT NULL,
     "note_date" date NOT NULL DEFAULT CURRENT_DATE,

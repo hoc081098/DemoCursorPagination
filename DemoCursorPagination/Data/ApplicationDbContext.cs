@@ -31,7 +31,7 @@ public partial class ApplicationDbContext : DbContext
             entity.HasIndex(e => e.UserId, "idx_user_notes_user_id");
 
             entity.Property(e => e.Id)
-                .HasValueGenerator<GuidV7ValueGenerator>()
+                .HasDefaultValueSql("uuidv7()")
                 .HasColumnName("id");
             entity.Property(e => e.Note)
                 .HasMaxLength(500)
@@ -53,7 +53,7 @@ public partial class ApplicationDbContext : DbContext
             entity.ToTable("users", "identity");
 
             entity.Property(e => e.Id)
-                .HasValueGenerator<GuidV7ValueGenerator>()
+                .HasDefaultValueSql("uuidv7()")
                 .HasColumnName("id");
             entity.Property(e => e.Name)
                 .HasMaxLength(20)
