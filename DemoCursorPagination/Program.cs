@@ -1,7 +1,9 @@
 using System.Text.Json;
+using DemoCursorPagination;
 using DemoCursorPagination.Data;
-using Microsoft.AspNetCore.Http.Json;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using JsonOptions = Microsoft.AspNetCore.Http.Json.JsonOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString);
     options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
 });
+
+builder.Services.AddScoped<CursorEndpoint>();
 
 builder.Services.Configure<JsonOptions>(options =>
 {
@@ -90,72 +94,11 @@ app.MapGet("/offset", async (
 });
 
 
-app.MapGet("/cursor", async (
-    ApplicationDbContext dbContext,
-    string? cursor = null,
-    int limit = 30,
-    CancellationToken cancellationToken = default
-) =>
-{
-    switch (limit)
-    {
-        case < 1:
-            return Results.BadRequest("Limit must be greater than 0");
-        case > 100:
-            return Results.BadRequest("Limit must be less than or equal to 100");
-    }
-
-    var decodedCursor = DemoCursorPagination.Cursor.Decode(cursor);
-    Console.WriteLine($"Cursor pagination: cursor={decodedCursor}, limit={limit}");
-
-    // Validate cursor version
-    if (decodedCursor is not null && decodedCursor.Version != 1)
-    {
-        return Results.BadRequest($"Unsupported cursor version: {decodedCursor.Version}. Expected version 1.");
-    }
-
-    var query = dbContext.UserNotes.AsNoTracking();
-    if (decodedCursor is not null)
-    {
-        // Use the cursor to fetch the next set of items
-        // If we're sorting in ASC order, we'd use '>' instead of '<'.
-        query = query.Where(x => EF.Functions.LessThanOrEqual(
-                ValueTuple.Create(x.NoteDate, x.Id),
-                ValueTuple.Create(decodedCursor.Date, decodedCursor.LastId)
-            )
-        );
-    }
-
-    // Fetch the items and determine if there are more
-    var items = await query
-        .OrderByDescending(x => x.NoteDate)
-        .ThenByDescending(x => x.Id)
-        .Take(limit + 1) // Take one extra item to check if there are more
-        .ToListAsync(cancellationToken);
-
-    // Extract the cursor and ID for the next page
-    var hasMore = items.Count > limit;
-    var nextCursor = hasMore
-        ? DemoCursorPagination.Cursor.Encode(
-            new DemoCursorPagination.Cursor(
-                items[^1].NoteDate,
-                items[^1].Id,
-                Version: 1)
-        )
-        : null;
-    if (hasMore)
-    {
-        items.RemoveAt(items.Count - 1); // Remove the extra item
-    }
-
-    return Results.Ok(new
-    {
-        Items = items,
-        // Metadata
-        Limit = limit,
-        HasMore = hasMore,
-        NextCursor = nextCursor
-    });
-});
+app.MapGet("/cursor",
+    (
+        [AsParameters] CursorEndpoint.Request request,
+        CursorEndpoint endpoint,
+        CancellationToken cancellationToken = default
+    ) => endpoint.Handle(request, cancellationToken));
 
 app.Run();

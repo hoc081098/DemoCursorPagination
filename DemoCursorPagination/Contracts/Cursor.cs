@@ -1,8 +1,8 @@
+using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication; // for Base64UrlTextEncoder
-using System.Text;
 
-namespace DemoCursorPagination;
+namespace DemoCursorPagination.Contracts;
 
 public sealed record Cursor(DateOnly Date, Guid LastId, int Version = 1)
 {
