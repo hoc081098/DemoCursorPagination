@@ -2,6 +2,7 @@ using DemoCursorPagination.Contracts;
 using DemoCursorPagination.Data;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DemoCursorPagination;
@@ -14,7 +15,7 @@ public sealed class OffsetEndpoint(
     [UsedImplicitly]
     public sealed record Request(
         int Page = 1,
-        int PageSize = 30);
+        [FromQuery(Name = "page_size")] int PageSize = 30);
 
     [UsedImplicitly]
     public sealed record Metadata(

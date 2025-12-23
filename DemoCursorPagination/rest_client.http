@@ -1,6 +1,6 @@
 @BASE_URL=https://localhost:7001
 
-GET {{BASE_URL}}/offset?page=1&pageSize=4
+GET {{BASE_URL}}/offset?page=1&page_size=4
 User-Agent: rest-client
 Content-Type: application/json
 Accept: application/json
