@@ -1,6 +1,5 @@
 using System.Text.Json;
 using DemoCursorPagination.Data;
-
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("Database") ??
-     throw new InvalidOperationException("Connection string 'Database' not found.");
+                           throw new InvalidOperationException("Connection string 'Database' not found.");
     options.UseNpgsql(connectionString);
     options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
 });
@@ -45,11 +44,11 @@ if (app.Environment.IsDevelopment())
 app.MapGet("/", () => "Hello World!");
 
 app.MapGet("/offset", async (
-  ApplicationDbContext dbContext,
-  int page = 1,
-  int pageSize = 30,
-  CancellationToken cancellationToken = default
-  ) =>
+    ApplicationDbContext dbContext,
+    int page = 1,
+    int pageSize = 30,
+    CancellationToken cancellationToken = default
+) =>
 {
     Console.WriteLine($"Offset pagination: page={page}, pageSize={pageSize}");
 
@@ -58,9 +57,9 @@ app.MapGet("/offset", async (
     if (pageSize > 100) return Results.BadRequest("Page size must be less than or equal to 100");
 
     var query = dbContext.UserNotes
-      .AsNoTracking()
-      .OrderByDescending(x => x.NoteDate)
-      .ThenByDescending(x => x.Id);
+        .AsNoTracking()
+        .OrderByDescending(x => x.NoteDate)
+        .ThenByDescending(x => x.Id);
 
     // Offset pagination typically counts the total number of items
     var totalCount = await query.CountAsync(cancellationToken);
@@ -68,9 +67,9 @@ app.MapGet("/offset", async (
 
     // Skip and take the required number of items
     var items = await query
-      .Skip((page - 1) * pageSize)
-      .Take(pageSize)
-      .ToListAsync(cancellationToken);
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync(cancellationToken);
 
     return Results.Ok(new
     {
@@ -87,10 +86,10 @@ app.MapGet("/offset", async (
 
 
 app.MapGet("/cursor", async (
-  ApplicationDbContext dbContext,
-  string? cursor = null,
-  int limit = 30,
-  CancellationToken cancellationToken = default
+    ApplicationDbContext dbContext,
+    string? cursor = null,
+    int limit = 30,
+    CancellationToken cancellationToken = default
 ) =>
 {
     if (limit < 1) return Results.BadRequest("Limit must be greater than 0");
@@ -110,30 +109,29 @@ app.MapGet("/cursor", async (
     {
         // Use the cursor to fetch the next set of items
         // If we sorting in ASC order, we'd use '>' instead of '<'.
-        query = query.Where(
-          x => EF.Functions.LessThanOrEqual(
-            ValueTuple.Create(x.NoteDate, x.Id),
-            ValueTuple.Create(decodedCursor.Date, Guid.Parse(decodedCursor.LastId))
-          )
+        query = query.Where(x => EF.Functions.LessThanOrEqual(
+                ValueTuple.Create(x.NoteDate, x.Id),
+                ValueTuple.Create(decodedCursor.Date, Guid.Parse(decodedCursor.LastId))
+            )
         );
     }
 
     // Fetch the items and determine if there are more
     var items = await query
-      .OrderByDescending(x => x.NoteDate)
-      .ThenByDescending(x => x.Id)
-      .Take(limit + 1) // Take one extra item to check if there are more
-      .ToListAsync(cancellationToken);
+        .OrderByDescending(x => x.NoteDate)
+        .ThenByDescending(x => x.Id)
+        .Take(limit + 1) // Take one extra item to check if there are more
+        .ToListAsync(cancellationToken);
 
     // Extract the cursor and ID for the next page
     var hasMore = items.Count > limit;
     string? nextCursor = hasMore
         ? DemoCursorPagination.Cursor.Encode(
-          new DemoCursorPagination.Cursor(
-            items[^1].NoteDate,
-            items[^1].Id.ToString(),
-            Version: 1)
-          )
+            new DemoCursorPagination.Cursor(
+                items[^1].NoteDate,
+                items[^1].Id.ToString(),
+                Version: 1)
+        )
         : null;
     if (hasMore)
     {
