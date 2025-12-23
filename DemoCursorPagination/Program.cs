@@ -121,7 +121,7 @@ app.MapGet("/cursor", async (
         // If we're sorting in ASC order, we'd use '>' instead of '<'.
         query = query.Where(x => EF.Functions.LessThanOrEqual(
                 ValueTuple.Create(x.NoteDate, x.Id),
-                ValueTuple.Create(decodedCursor.Date, Guid.Parse(decodedCursor.LastId))
+                ValueTuple.Create(decodedCursor.Date, decodedCursor.LastId)
             )
         );
     }
@@ -139,7 +139,7 @@ app.MapGet("/cursor", async (
         ? DemoCursorPagination.Cursor.Encode(
             new DemoCursorPagination.Cursor(
                 items[^1].NoteDate,
-                items[^1].Id.ToString(),
+                items[^1].Id,
                 Version: 1)
         )
         : null;
